@@ -1,0 +1,21 @@
+{
+  "name": "sky-function",
+  "version": "1.0.0",
+  "description": "test",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "request": "cat request.json | base64"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "node-forge": "^1.3.0",
+    "skyflow-node": "^1.0.0"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "requestBulk":{
+    "Business": {
+      "IdCompany": "M19A",
+      "IdBranch": "0001",
+      "Country": "MEX",
+      "User": "M19AITUS0",
+      "Pwd": "AU48HGY2ZQ"
+    },
+    "Transaction": {
+      "Merchant": "289015",
+      "Reference": "csscdcd",
+      "TpOperation": "30",
+      "Creditcard": {
+        "Crypto": "0",
+        "Type": "V/MC",
+        "Name": "Eugenio Orozco Marcos",
+        "Number": "4152314068147456",
+        "ExpMonth": "09",
+        "ExpYear": "27",
+        "CvvCsc": "1999"
+      },
+      "Amount": 200,
+      "Currency": "MXN",
+      "ConfirmationEmail": "pruebas@mitec.com.mx",
+      "UsrTransacction": "Cobros",
+      "Version": "Integra 1.0",
+      "Multiadq": {
+        "Merchant": "7020305",
+        "Acquirer": "132"
+      }
+    }
+  },
+  "request3DS": {
+    "TRANSACTION3DS": {
+      "business": {
+        "bs_idCompany": "M19A",
+        "bs_idBranch": "0002",
+        "bs_country": "MEX",
+        "bs_user": "M19AITUS1",
+        "bs_pwd": "E58D433Y5Z"
+      },
+      "transaction": {
+        "tx_merchant": "289015",
+        "tx_reference": "testlenin11hgfd",
+        "tx_amount": 200,
+        "tx_currency": "MXN",
+        "creditcard": {
+          "cc_name": "Eugenio Orozco Marcos",
+          "cc_number": "4152314068147456",
+          "cc_expMonth": "09",
+          "cc_expYear": "27",
+          "cc_cvv": "1999"
+        },
+        "bl_billingPhone": "8183402040",
+        "bl_billingEmail": "lenin@tonder.io",
+        "tx_urlResponse": "https://webhook.site/5bf5ed50-01fe-4abb-833c-af64bc6b5e33",
+        "tx_cobro": 0
+      }
+    }
+  },
+  "keyIntegration": {
+    "data0": "9265660159",
+    "seedAES": "B531B42EAC343095DF38259B2D08A431"
+  }
+}
