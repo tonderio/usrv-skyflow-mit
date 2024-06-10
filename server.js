@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { paymentsAPI } = require('./paymentsAPI2');
+const { paymentsAPI } = require('./paymentsAPI');
 
 const app = express();
 const port = process.env.PORT || 3000;

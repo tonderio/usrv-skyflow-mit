@@ -1,8 +1,8 @@
 const axios = require('axios');
 const { generateBearerTokenFromCreds } = require("skyflow-node");
-const CryptoJS = require('crypto-js');
+const crypto = require("crypto");
 
-exports.skyflowmain = async function (event) {
+exports.skyflowmain = async (event) => {
     let functionResponse = {
         bodyBytes: "",
         headers: {
@@ -13,7 +13,7 @@ exports.skyflowmain = async function (event) {
     };
     try {
         const buf = Buffer.from(event.BodyContent, 'base64')
-        const data = JSON.parse(buf.toString())
+        const data = JSON.parse(buf)
 
         const detokenizedCreditCard = await detokenizeCreditCardInfo(data.requestBulk.Transaction.Creditcard, event);
         if (!detokenizedCreditCard.success) {
@@ -45,20 +45,25 @@ exports.skyflowmain = async function (event) {
     }
 };
 
-async function flowBulk(requestBulk, keyIntegration) {
+const flowBulk = async (requestBulk, keyIntegration) => {
     const jsonString = JSON.stringify(requestBulk);
     const aesEncryption = createAESEncryption(keyIntegration.seedAES);
     const requestBulkEncryptedData = aesEncryption.encrypt(jsonString);
     try {
         const responseBulkEncryptedData = await clientBulkFlow(requestBulkEncryptedData, keyIntegration.data0);
-        const responseBulkDecryptedData = aesEncryption.decrypt(responseBulkEncryptedData);
-        return responseBulkDecryptedData;
+        const responseBulkDecryptedData = JSON.parse(aesEncryption.decrypt(responseBulkEncryptedData));
+        const transactionStatus = responseBulkDecryptedData && 'CdResponse' in responseBulkDecryptedData && responseBulkDecryptedData.CdResponse.trim() === '0C' ? 'success' : 'declined';
+
+        return {
+            data: responseBulkDecryptedData,
+            transactionStatus: transactionStatus
+        };
     } catch (error) {
         throw error;
     }
 };
 
-async function clientBulkFlow(encryptedData, data0) {
+const clientBulkFlow = async(encryptedData, data0) => {
     const url = process.env.pspUrl;
     const requestData = JSON.stringify({
         "data0": data0,
@@ -85,39 +90,34 @@ function createAESEncryption(keyHex) {
     if (keyHex.length !== 32) {
         throw new Error('Invalid key length for AES-128. Key must be 32 hexadecimal characters (16 bytes).');
     }
-    const key = CryptoJS.enc.Hex.parse(keyHex);
+
+    const key = Buffer.from(keyHex, 'hex');
 
     function encrypt(plaintext) {
-        const iv = CryptoJS.lib.WordArray.random(16);
-        const encrypted = CryptoJS.AES.encrypt(plaintext, key, {
-            iv: iv,
-            padding: CryptoJS.pad.Pkcs7,
-            mode: CryptoJS.mode.CBC
-        });
-        const encryptedText = iv.concat(encrypted.ciphertext).toString(CryptoJS.enc.Base64);
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv('aes-128-cbc', key, iv);
+        let encrypted = cipher.update(plaintext, 'utf8', 'base64');
+        encrypted += cipher.final('base64');
+        const encryptedText = Buffer.concat([iv, Buffer.from(encrypted, 'base64')]).toString('base64');
         return encryptedText;
     }
 
     function decrypt(encryptedData) {
-        const encryptedBuffer = CryptoJS.enc.Base64.parse(encryptedData);
-        const iv = CryptoJS.lib.WordArray.create(encryptedBuffer.words.slice(0, 4));
-        const ciphertext = CryptoJS.lib.WordArray.create(encryptedBuffer.words.slice(4));
+        const encryptedBuffer = Buffer.from(encryptedData, 'base64');
+        const iv = encryptedBuffer.slice(0, 16);
+        const ciphertext = encryptedBuffer.slice(16);
 
-        const decrypted = CryptoJS.AES.decrypt({
-            ciphertext: ciphertext
-        }, key, {
-            iv: iv,
-            padding: CryptoJS.pad.Pkcs7,
-            mode: CryptoJS.mode.CBC
-        });
+        const decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
+        let decrypted = decipher.update(ciphertext, 'base64', 'utf8');
+        decrypted += decipher.final('utf8');
 
-        return decrypted.toString(CryptoJS.enc.Utf8);
+        return decrypted;
     }
 
     return { encrypt, decrypt };
 }
 
-async function detokenizeCreditCardInfo(creditCard, event) {
+const detokenizeCreditCardInfo = async (creditCard, event) => {
     const tokenizedFields = [
         { fieldName: "Number", fieldValue: creditCard.Number },
         { fieldName: "ExpMonth", fieldValue: creditCard.ExpMonth },

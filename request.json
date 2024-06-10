@@ -9,7 +9,7 @@
     },
     "Transaction": {
       "Merchant": "289015",
-      "Reference": "csscdcd",
+      "Reference": "testingsky12",
       "TpOperation": "30",
       "Creditcard": {
         "Crypto": "0",
@@ -42,7 +42,7 @@
       },
       "transaction": {
         "tx_merchant": "289015",
-        "tx_reference": "testlenin11hgfd",
+        "tx_reference": "testingsky12",
         "tx_amount": 200,
         "tx_currency": "MXN",
         "creditcard": {
